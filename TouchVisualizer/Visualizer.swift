@@ -5,18 +5,18 @@
 
 import UIKit
 
-final public class Visualizer:NSObject {
+public final class Visualizer: NSObject {
     
     // MARK: - Public Variables
-    static public let sharedInstance = Visualizer()
+    public static let sharedInstance = Visualizer()
     fileprivate var enabled = false
     fileprivate var config: Configuration!
     fileprivate var touchViews = [TouchView]()
     fileprivate var previousLog = ""
     
     // MARK: - Object life cycle
-    private override init() {
-      super.init()
+    override private init() {
+        super.init()
         NotificationCenter
             .default
             .addObserver(self, selector: #selector(Visualizer.orientationDidChangeNotification(_:)), name: UIDevice.orientationDidChangeNotification, object: nil)
@@ -51,7 +51,7 @@ final public class Visualizer:NSObject {
     }
     
     public func removeAllTouchViews() {
-        for view in self.touchViews {
+        for view in touchViews {
             view.removeFromSuperview()
         }
     }
@@ -65,10 +65,10 @@ extension Visualizer {
     // MARK: - Start and Stop functions
     
     public class func start(_ config: Configuration = Configuration()) {
-		
-		if config.showsLog {
-			print("Visualizer start...")
-		}
+        
+        if config.showsLog {
+            print("Visualizer start...")
+        }
         let instance = sharedInstance
         instance.enabled = true
         instance.config = config
@@ -80,9 +80,9 @@ extension Visualizer {
                 }
             }
         }
-		if config.showsLog {
-			print("started !")
-		}
+        if config.showsLog {
+            print("started !")
+        }
     }
     
     public class func stop() {
@@ -140,10 +140,10 @@ extension Visualizer {
         if !Visualizer.sharedInstance.enabled {
             return
         }
-
+        
         var topWindow = UIApplication.shared.keyWindow!
         for window in UIApplication.shared.windows {
-            if window.isHidden == false && window.windowLevel > topWindow.windowLevel {
+            if window.isHidden == false, window.windowLevel > topWindow.windowLevel {
                 topWindow = window
             }
         }
@@ -169,16 +169,17 @@ extension Visualizer {
                 log(touch)
             case .ended, .cancelled:
                 if let view = findTouchView(touch) {
-                    UIView.animate(withDuration: 0.2, delay: 0.0, options: .allowUserInteraction, animations: { () -> Void  in
+                    UIView.animate(withDuration: 0.2, delay: 0.0, options: .allowUserInteraction, animations: { () -> Void in
                         view.alpha = 0.0
                         view.endTouch()
-                    }, completion: { [unowned self] (finished) -> Void in
+                    }, completion: { [unowned self] (_) -> Void in
                         view.removeFromSuperview()
                         self.log(touch)
                     })
                 }
-                
                 log(touch)
+            default:
+                break
             }
         }
     }
@@ -198,7 +199,7 @@ extension Visualizer {
         }
         
         var ti = 0
-        var viewLogs = [[String:String]]()
+        var viewLogs = [[String: String]]()
         for view in touchViews {
             var index = ""
             
@@ -212,6 +213,8 @@ extension Visualizer {
             case .stationary: phase = "S"
             case .ended: phase = "E"
             case .cancelled: phase = "C"
+            default:
+                break
             }
             
             let x = String(format: "%.02f", view.center.x)
@@ -225,7 +228,7 @@ extension Visualizer {
         
         for viewLog in viewLogs {
             
-            if (viewLog["index"]!).count == 0 {
+            if (viewLog["index"]!).isEmpty {
                 continue
             }
             
